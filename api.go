@@ -1,6 +1,7 @@
 package figma
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -40,7 +41,7 @@ func New(token string) *Client {
 func (c *Client) File(key string) (File, error) {
 	var res File
 
-	path := fmt.Sprintf("%s/v1/Files/%s", apiURL, key)
+	path := fmt.Sprintf("%s/v1/files/%s", apiURL, key)
 	if err := get(c.client, c.token, path, &res); err != nil {
 		return res, err
 	}
@@ -74,12 +75,45 @@ func (c *Client) Images(key string, scale float64, i ImageFormat, ids ...string)
 	v.Add("format", string(i))
 	v.Add("ids", strings.Join(ids, ","))
 
-	path := fmt.Sprintf("%s/v1/Images/%s?%s", apiURL, key, v.Encode())
+	path := fmt.Sprintf("%s/v1/images/%s?%s", apiURL, key, v.Encode())
 	if err := get(c.client, c.token, path, &res); err != nil {
 		return nil, err
 	}
 
 	return res.Images, nil
+}
+
+// Comments returns a list of comments made on a file.
+//  key is the file to retrieve comments from.
+func (c *Client) Comments(key string) (Comments, error) {
+	var res commentResponse
+
+	path := fmt.Sprintf("%s/v1/files/%s/comments", apiURL, key)
+	if err := get(c.client, c.token, path, &res); err != nil {
+		return nil, err
+	}
+
+	return res.Comments, nil
+}
+
+// AddComment posts a new comment on the file.
+//  key is the file to add the comment to.
+// 	message is the text contents of the comment to post.
+//	v is the absolute canvas position of where to place the comment.
+func (c *Client) AddComment(key, message string, v Vector) (Comment, error) {
+	var res Comment
+
+	input := map[string]interface{}{
+		"message":     message,
+		"client_meta": v,
+	}
+
+	path := fmt.Sprintf("%s/v1/files/%s/comments", apiURL, key)
+	if err := post(c.client, c.token, path, input, &res); err != nil {
+		return res, err
+	}
+
+	return res, nil
 }
 
 func get(c *http.Client, token, url string, res interface{}) error {
@@ -102,6 +136,38 @@ func get(c *http.Client, token, url string, res interface{}) error {
 	}
 
 	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("%s: expected status %d got %d", url, http.StatusOK, resp.StatusCode)
+	}
+
+	return nil
+}
+
+func post(c *http.Client, token, url string, body, res interface{}) error {
+	data, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("%s: failed to marshal body: %s", url, err)
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
+	if err != nil {
+		return fmt.Errorf("%s: failed to build request: %s", url, err)
+	}
+
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("X-Figma-Token", token)
+
+	resp, err := c.Do(req)
+	if err != nil {
+		return fmt.Errorf("%s: failed to peform request: %s", url, err)
+	}
+	defer resp.Body.Close()
+
+	if err := json.NewDecoder(resp.Body).Decode(res); err != nil {
+		return fmt.Errorf("%s: failed to decode request: %s", url, err)
+	}
+
+	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("%s: expected status %d got %d", url, http.StatusOK, resp.StatusCode)
 	}
 
