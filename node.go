@@ -62,7 +62,7 @@ const (
 	// NodeTypeRegularPolygon is a regular n-sided polygon
 	NodeTypeRegularPolygon = "REGULAR_POLYGON"
 
-	// NodeTypeRectangle is a rectange
+	// NodeTypeRectangle is a rectangle
 	NodeTypeRectangle = "RECTANGLE"
 
 	// NodeTypeText is a text box
@@ -78,7 +78,7 @@ const (
 	NodeTypeInstance = "INSTANCE"
 )
 
-// Node contains a group of properties whic specifies a leaf in a Figma
+// Node contains a group of properties which specifies a leaf in a Figma
 // File.
 //
 // Files in Figma consist of a tree of nodes, each with some number of

@@ -33,7 +33,7 @@ func New(token string) *Client {
 	}
 }
 
-// File returns the document refered to by key.
+// File returns the document referred to by key.
 //	key is the file to export from.
 //
 // The file key can be parsed from any Figma file url:
