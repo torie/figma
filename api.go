@@ -83,6 +83,26 @@ func (c *Client) Images(key string, scale float64, i ImageFormat, ids ...string)
 	return res.Images, nil
 }
 
+// FileVersions returns a list of the version history of a file. The version
+// history consists of versions, manually-saved additions to the version history
+// of a file. If the account is not on a paid team, version history is limited
+// to the past 30 days. Note that version history will not include autosaved
+// versions.
+//  key is the file to retrieve versions from.
+//
+// Note: This endpoint by default will paginate the results, starting with the
+// most recent 30 results.
+func (c *Client) FileVersions(key string) ([]Version, error) {
+	var res versionResponse
+
+	path := fmt.Sprintf("%s/v1/files/%s/versions", apiURL, key)
+	if err := get(c.client, c.token, path, &res); err != nil {
+		return nil, err
+	}
+
+	return res.Versions, nil
+}
+
 // Comments returns a list of comments made on a file.
 //  key is the file to retrieve comments from.
 func (c *Client) Comments(key string) (Comments, error) {
