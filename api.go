@@ -116,6 +116,21 @@ func (c *Client) AddComment(key, message string, v Vector) (Comment, error) {
 	return res, nil
 }
 
+// TeamProjects lists the projects for a specified team. Note that this will
+// only return projects visible to the authenticated user or owner of the
+// developer token.
+//	teamID is the id of the team to list projects from
+func (c *Client) TeamProjects(teamID string) ([]TeamProject, error) {
+	var res teamProjectsResponse
+
+	path := fmt.Sprintf("%s/v1/teams/%s/projects", apiURL, teamID)
+	if err := get(c.client, c.token, path, &res); err != nil {
+		return nil, err
+	}
+
+	return res.Projects, nil
+}
+
 func get(c *http.Client, token, url string, res interface{}) error {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
