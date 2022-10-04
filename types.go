@@ -193,7 +193,7 @@ type Rectangle struct {
 type ExportSetting struct {
 	Suffix     string
 	Format     ImageFormat
-	Constraint string
+	Constraint Constraint
 }
 
 // Constraint describes sizing constraint for exports.
