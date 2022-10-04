@@ -116,7 +116,7 @@ type Node struct {
 	IsMask              bool
 	Fills               []Paint     `json:"fills,omitempty"`
 	Strokes             []Paint     `json:"strokes,omitempty"`
-	StrokeWeight        int         `json:"strokeWeight,omitempty"`
+	StrokeWeight        float64     `json:"strokeWeight,omitempty"`
 	StrokeAlign         StrokeAlign `json:"strokeAlign,omitempty"`
 	Characters          string      `json:"characters,omitempty"`
 	Style               TypeStyle   `json:"style,omitempty"`
